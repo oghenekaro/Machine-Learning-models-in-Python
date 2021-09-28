@@ -1,0 +1,865 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Untitled1.ipynb",
+      "provenance": [],
+      "authorship_tag": "ABX9TyPBvWhu0gYr0pWBf7G5RwJY",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/oghenekaro/Machine-Learning-models-in-Python/blob/main/Regression%20models%20for%20prediction%20%26%20classification\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "VVi3VrGm_cZX"
+      },
+      "source": [
+        "!pip install -q sklearn"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "9vhn6wkcSCv2",
+        "outputId": "e9548396-e813-40dd-cc8f-ce218fd6e6ac"
+      },
+      "source": [
+        "pip install future"
+      ],
+      "execution_count": 6,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requirement already satisfied: future in /usr/local/lib/python3.7/dist-packages (0.16.0)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "oMiF9007B4eC"
+      },
+      "source": [
+        "%tensorflow_version 2.x # this line is not required unless you are in a notebook"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 286
+        },
+        "id": "zDBY0KAVDT3i",
+        "outputId": "cf0f88c1-a079-402e-e713-bbf39f450cf2"
+      },
+      "source": [
+        "import matplotlib.pyplot as plt\n",
+        "import numpy as np\n",
+        "\n",
+        "x = [1, 2, 2.5, 3, 4]\n",
+        "y = [1, 4, 7, 9, 15]\n",
+        "plt.plot(x, y, 'ro')\n",
+        "plt.axis([0, 6, 0, 20])\n",
+        "plt.plot(np.unique(x), np.poly1d(np.polyfit(x, y, 1))(np.unique(x)))"
+      ],
+      "execution_count": 24,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[<matplotlib.lines.Line2D at 0x7f0d8150ab50>]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 24
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "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\n",
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "4UiCkoN7LqAC"
+      },
+      "source": [
+        "!pip install pandas"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "qcII_xj9Ntyo"
+      },
+      "source": [
+        "from __future__ import absolute_import, division, print_function, unicode_literals\n",
+        "\n",
+        "import numpy as np\n",
+        "import pandas as pd\n",
+        "import matplotlib.pyplot as plt\n",
+        "from IPython.display import clear_output\n",
+        "from six.moves import urllib\n",
+        "\n",
+        "import tensorflow.compat.v2.feature_column as fc\n",
+        "\n",
+        "import tensorflow as tf"
+      ],
+      "execution_count": 3,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "TXwWZ-glEj2q",
+        "outputId": "8f069b7e-a069-4f92-d22e-e0a13500f685"
+      },
+      "source": [
+        "# Load dataset\n",
+        "dftrain = pd.read_csv('https://storage.googleapis.com/tf-datasets/titanic/train.csv') # training data\n",
+        "dfeval = pd.read_csv('https://storage.googleapis.com/tf-datasets/titanic/eval.csv') # testing data\n",
+        "print(dftrain.head())\n",
+        "y_train = dftrain.pop('survived')\n",
+        "y_eval = dfeval.pop('survived')\n",
+        "print(dftrain.head()) # removes the \"survived column [outcome of interest from the data frame]\""
+      ],
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "   survived     sex   age  ...     deck  embark_town  alone\n",
+            "0         0    male  22.0  ...  unknown  Southampton      n\n",
+            "1         1  female  38.0  ...        C    Cherbourg      n\n",
+            "2         1  female  26.0  ...  unknown  Southampton      y\n",
+            "3         1  female  35.0  ...        C  Southampton      n\n",
+            "4         0    male  28.0  ...  unknown   Queenstown      y\n",
+            "\n",
+            "[5 rows x 10 columns]\n",
+            "      sex   age  n_siblings_spouses  parch  ...  class     deck  embark_town alone\n",
+            "0    male  22.0                   1      0  ...  Third  unknown  Southampton     n\n",
+            "1  female  38.0                   1      0  ...  First        C    Cherbourg     n\n",
+            "2  female  26.0                   0      0  ...  Third  unknown  Southampton     y\n",
+            "3  female  35.0                   1      0  ...  First        C  Southampton     n\n",
+            "4    male  28.0                   0      0  ...  Third  unknown   Queenstown     y\n",
+            "\n",
+            "[5 rows x 9 columns]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 297
+        },
+        "id": "3qqStk1WU2VO",
+        "outputId": "6326c9ad-da95-4cc9-ac98-cf61a0044728"
+      },
+      "source": [
+        "dftrain.describe()"
+      ],
+      "execution_count": 27,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>age</th>\n",
+              "      <th>n_siblings_spouses</th>\n",
+              "      <th>parch</th>\n",
+              "      <th>fare</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>count</th>\n",
+              "      <td>627.000000</td>\n",
+              "      <td>627.000000</td>\n",
+              "      <td>627.000000</td>\n",
+              "      <td>627.000000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>mean</th>\n",
+              "      <td>29.631308</td>\n",
+              "      <td>0.545455</td>\n",
+              "      <td>0.379585</td>\n",
+              "      <td>34.385399</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>std</th>\n",
+              "      <td>12.511818</td>\n",
+              "      <td>1.151090</td>\n",
+              "      <td>0.792999</td>\n",
+              "      <td>54.597730</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>min</th>\n",
+              "      <td>0.750000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>25%</th>\n",
+              "      <td>23.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>7.895800</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>50%</th>\n",
+              "      <td>28.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>15.045800</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>75%</th>\n",
+              "      <td>35.000000</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>31.387500</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>max</th>\n",
+              "      <td>80.000000</td>\n",
+              "      <td>8.000000</td>\n",
+              "      <td>5.000000</td>\n",
+              "      <td>512.329200</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "              age  n_siblings_spouses       parch        fare\n",
+              "count  627.000000          627.000000  627.000000  627.000000\n",
+              "mean    29.631308            0.545455    0.379585   34.385399\n",
+              "std     12.511818            1.151090    0.792999   54.597730\n",
+              "min      0.750000            0.000000    0.000000    0.000000\n",
+              "25%     23.000000            0.000000    0.000000    7.895800\n",
+              "50%     28.000000            0.000000    0.000000   15.045800\n",
+              "75%     35.000000            1.000000    0.000000   31.387500\n",
+              "max     80.000000            8.000000    5.000000  512.329200"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 27
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "gVV0HZyNXLXk",
+        "outputId": "a06d15bc-0994-4a25-e769-e35947cc3f95"
+      },
+      "source": [
+        "dftrain.shape"
+      ],
+      "execution_count": 28,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "(627, 9)"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 28
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "IcAf2mX1XPuq",
+        "outputId": "c415e778-e1bf-4ac1-fdcd-0076ca2f6863"
+      },
+      "source": [
+        "y_train.head()"
+      ],
+      "execution_count": 29,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "0    0\n",
+              "1    1\n",
+              "2    1\n",
+              "3    1\n",
+              "4    0\n",
+              "Name: survived, dtype: int64"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 29
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 282
+        },
+        "id": "9ddJbkGXXbQ5",
+        "outputId": "81a18c94-e4c4-47c0-b634-f9e5c1df8664"
+      },
+      "source": [
+        "dftrain.age.hist(bins = 20)"
+      ],
+      "execution_count": 6,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<matplotlib.axes._subplots.AxesSubplot at 0x7f0d86418a50>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 6
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "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\n",
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 282
+        },
+        "id": "LyCe_lE6XgAC",
+        "outputId": "8ba5d63c-764f-4e8a-a05d-b307096a1f6f"
+      },
+      "source": [
+        "dftrain.sex.value_counts().plot(kind = 'barh')"
+      ],
+      "execution_count": 8,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<matplotlib.axes._subplots.AxesSubplot at 0x7f86a09f1310>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 8
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "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0bPGGOckeVGSn6iqZ6++cyzOAbfF54O30yyT303ypCRnJbkzydvnHKaqTkry50l+Zozx1dX3zbl268y1LdZtjPG1McZZSU7P4szkyXPMsZ61s1XVmUnemMWMz0jymCQ/v+y5quqHktw1xti37GPfn2M5DHckefyq26dP+2Yzxrhj+vWuJH+RxQvki4dPRadf75pvwg1nmX0txxhfnF7A9yV5d75x2WPps1XVcVn84fu+McaHp92zr916c22ndZvm+UqSq5N8dxaXYQ7/f2yrj//12ab7T07yn0uc7YXTpbkxxrg3yR9knnX73iQvrqqDWVwKf16S38o2WLdjOQz/kGT39A7+8Vm8GfPRuYapqhOr6lGHt5O8IMlN00wXTg+7MMlH5pkwOcIsH03y6ukTGc9McmjVZZOlWHMd96VZrN3h2V4xfSLjiUl2J7l2C+eoJL+f5JYxxm+sumvWtdtoru2wblV1alU9etr+liQ/kMV7IFcnefn0sLVrdngtX57kquksbFmz3boq8pXFNfzV67aU18IY441jjNPHGCtZ/Pl11RjjldkG67al77Zv9VcWnyD4XBbXM9808yxnZPEpkBuS3Hx4niyuAX46yeeT/HWSxyxpnj/N4tLC/2RxnfK1G82SxScw3jmt4/4k584w2x9Nx74xixfArlWPf9M024EkL9ri2Z6VxWWiG5NcP32dP/faHWGu2dctydOSXDfNcFOSN696TVybxRvfH0yyc9p/wnT7tun+M2aY7app3W5K8sf5xieXlvpaWDXnc/KNTyXNvm7+SwwAmmP5UhIAW0AYAGiEAYBGGABohAGARhgAaIQBgOb/AEYEJAUZdZ+FAAAAAElFTkSuQmCC\n",
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 296
+        },
+        "id": "SdgIIHnGXtBC",
+        "outputId": "a7270418-4644-4b74-a596-e09cb8b336af"
+      },
+      "source": [
+        "pd.concat([dftrain, y_train], axis = 1).groupby('sex').survived.mean().plot(kind = 'barh').set_xlabel('% survive')"
+      ],
+      "execution_count": 9,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "Text(0.5, 0, '% survive')"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 9
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "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\n",
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "O1rTfDMWYVmC",
+        "outputId": "a6dcda5a-61bd-4382-9c6f-f955216ab20c"
+      },
+      "source": [
+        "dfeval.shape"
+      ],
+      "execution_count": 30,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "(264, 9)"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 30
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "-_laAdBka_k-",
+        "outputId": "3e44c056-929a-4ea8-9068-4d4ec1a95e00"
+      },
+      "source": [
+        "# Load dataset\n",
+        "dftrain = pd.read_csv('https://storage.googleapis.com/tf-datasets/titanic/train.csv') # training data\n",
+        "dfeval = pd.read_csv('https://storage.googleapis.com/tf-datasets/titanic/eval.csv') # testing data\n",
+        "print(dftrain.head())\n",
+        "y_train = dftrain.pop('survived')\n",
+        "y_eval = dfeval.pop('survived')\n",
+        "print(dftrain.head()) # removes the \"survived column [outcome of interest from the data frame]\""
+      ],
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "   survived     sex   age  ...     deck  embark_town  alone\n",
+            "0         0    male  22.0  ...  unknown  Southampton      n\n",
+            "1         1  female  38.0  ...        C    Cherbourg      n\n",
+            "2         1  female  26.0  ...  unknown  Southampton      y\n",
+            "3         1  female  35.0  ...        C  Southampton      n\n",
+            "4         0    male  28.0  ...  unknown   Queenstown      y\n",
+            "\n",
+            "[5 rows x 10 columns]\n",
+            "      sex   age  n_siblings_spouses  parch  ...  class     deck  embark_town alone\n",
+            "0    male  22.0                   1      0  ...  Third  unknown  Southampton     n\n",
+            "1  female  38.0                   1      0  ...  First        C    Cherbourg     n\n",
+            "2  female  26.0                   0      0  ...  Third  unknown  Southampton     y\n",
+            "3  female  35.0                   1      0  ...  First        C  Southampton     n\n",
+            "4    male  28.0                   0      0  ...  Third  unknown   Queenstown     y\n",
+            "\n",
+            "[5 rows x 9 columns]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "Sp1imF8lYa_5",
+        "outputId": "33014310-e28e-44a0-ce86-8d1ce40fc408"
+      },
+      "source": [
+        "CATEGORICAL_COLUMNS = ['sex', 'n_siblings_spouses', 'parch', 'class', 'deck',\n",
+        "                       'embark_town', 'alone']\n",
+        "NUMERIC_COLUMNS = ['age', 'fare']\n",
+        "\n",
+        "feature_columns = []\n",
+        "for feature_name in CATEGORICAL_COLUMNS:\n",
+        "  vocabulary = dftrain[feature_name].unique() # gets a list of all unique values from given feature column\n",
+        "  feature_columns.append(tf.feature_column.categorical_column_with_vocabulary_list(feature_name, vocabulary))\n",
+        "\n",
+        "for feature_name in NUMERIC_COLUMNS:\n",
+        "  feature_columns.append(tf.feature_column.numeric_column(feature_name, dtype=tf.float32))\n",
+        "\n",
+        "print(feature_columns)"
+      ],
+      "execution_count": 6,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[VocabularyListCategoricalColumn(key='sex', vocabulary_list=('male', 'female'), dtype=tf.string, default_value=-1, num_oov_buckets=0), VocabularyListCategoricalColumn(key='n_siblings_spouses', vocabulary_list=(1, 0, 3, 4, 2, 5, 8), dtype=tf.int64, default_value=-1, num_oov_buckets=0), VocabularyListCategoricalColumn(key='parch', vocabulary_list=(0, 1, 2, 5, 3, 4), dtype=tf.int64, default_value=-1, num_oov_buckets=0), VocabularyListCategoricalColumn(key='class', vocabulary_list=('Third', 'First', 'Second'), dtype=tf.string, default_value=-1, num_oov_buckets=0), VocabularyListCategoricalColumn(key='deck', vocabulary_list=('unknown', 'C', 'G', 'A', 'B', 'D', 'F', 'E'), dtype=tf.string, default_value=-1, num_oov_buckets=0), VocabularyListCategoricalColumn(key='embark_town', vocabulary_list=('Southampton', 'Cherbourg', 'Queenstown', 'unknown'), dtype=tf.string, default_value=-1, num_oov_buckets=0), VocabularyListCategoricalColumn(key='alone', vocabulary_list=('n', 'y'), dtype=tf.string, default_value=-1, num_oov_buckets=0), NumericColumn(key='age', shape=(1,), default_value=None, dtype=tf.float32, normalizer_fn=None), NumericColumn(key='fare', shape=(1,), default_value=None, dtype=tf.float32, normalizer_fn=None)]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "sEoRcwIybs5q",
+        "outputId": "92e2c3f2-912e-4d12-cd97-454d6254677e"
+      },
+      "source": [
+        "dftrain[\"sex\"].unique()"
+      ],
+      "execution_count": 10,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array(['male', 'female'], dtype=object)"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 10
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "YRYaaRQWb4Kp"
+      },
+      "source": [
+        "dftrain[\"embark_town\"].unique()"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "fOucgODitXoI"
+      },
+      "source": [
+        "def make_input_fn(data_df, label_df, num_epochs =10, shuffle = True, batch_size=32):\n",
+        "  def input_function(): # inner function, this will be returned\n",
+        "    ds = tf.data.Dataset.from_tensor_slices((dict(data_df), label_df)) # create tf.data.Dataset object with data and its label\n",
+        "    if shuffle:\n",
+        "      ds = ds.shuffle(1000) # randomize order of data\n",
+        "    ds = ds.batch(batch_size).repeat(num_epochs) # split dataset into batches of 32 and repeat process for number of epochs\n",
+        "    return ds # return a batch of the dataset\n",
+        "  return input_function # return a function object for use\n",
+        "\n",
+        "train_input_fn = make_input_fn(dftrain, y_train) # here we will call the input_function that was returned to us to get a dataset object we can feed to the model\n",
+        "eval_input_fn = make_input_fn(dfeval, y_eval, num_epochs=1, shuffle=False)"
+      ],
+      "execution_count": 20,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "yBZuqV5B-H7j",
+        "outputId": "cf1cb149-4b43-4965-9a1a-dd04067dca1e"
+      },
+      "source": [
+        "# Creating the model\n",
+        "linear_est = tf.estimator.LinearClassifier(feature_columns = feature_columns)\n",
+        "# We create a linear estimator by passing the feature columns we created earlier"
+      ],
+      "execution_count": 21,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "INFO:tensorflow:Using default config.\n",
+            "WARNING:tensorflow:Using temporary folder as model directory: /tmp/tmp751xjlyc\n",
+            "INFO:tensorflow:Using config: {'_model_dir': '/tmp/tmp751xjlyc', '_tf_random_seed': None, '_save_summary_steps': 100, '_save_checkpoints_steps': None, '_save_checkpoints_secs': 600, '_session_config': allow_soft_placement: true\n",
+            "graph_options {\n",
+            "  rewrite_options {\n",
+            "    meta_optimizer_iterations: ONE\n",
+            "  }\n",
+            "}\n",
+            ", '_keep_checkpoint_max': 5, '_keep_checkpoint_every_n_hours': 10000, '_log_step_count_steps': 100, '_train_distribute': None, '_device_fn': None, '_protocol': None, '_eval_distribute': None, '_experimental_distribute': None, '_experimental_max_worker_delay_secs': None, '_session_creation_timeout_secs': 7200, '_checkpoint_save_graph_def': True, '_service': None, '_cluster_spec': ClusterSpec({}), '_task_type': 'worker', '_task_id': 0, '_global_id_in_cluster': 0, '_master': '', '_evaluation_master': '', '_is_chief': True, '_num_ps_replicas': 0, '_num_worker_replicas': 1}\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "V1M6Zk1e5xPU",
+        "outputId": "fb4d4e7f-2414-4ca9-927d-fcc72b9d70dc"
+      },
+      "source": [
+        "# Training the model\n",
+        "linear_est.train(train_input_fn) # train\n",
+        "result = linear_est.evaluate(eval_input_fn) # get model metrics/stats by testing on testing data\n",
+        "\n",
+        "clear_output() # clears console output\n",
+        "print(result['accuracy']) # the result variable is simply a dict of stats about our model"
+      ],
+      "execution_count": 22,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "0.75757575\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "15m-ehGyrgeh",
+        "outputId": "db165534-21b9-4202-ed45-ff5be1b4d479"
+      },
+      "source": [
+        "result = list(linear_est.predict(eval_input_fn))\n",
+        "print(result)"
+      ],
+      "execution_count": 24,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "INFO:tensorflow:Calling model_fn.\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/usr/local/lib/python3.7/dist-packages/keras/engine/base_layer_v1.py:1684: UserWarning: `layer.add_variable` is deprecated and will be removed in a future version. Please use `layer.add_weight` method instead.\n",
+            "  warnings.warn('`layer.add_variable` is deprecated and '\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "INFO:tensorflow:Done calling model_fn.\n",
+            "INFO:tensorflow:Graph was finalized.\n",
+            "INFO:tensorflow:Restoring parameters from /tmp/tmp751xjlyc/model.ckpt-200\n",
+            "INFO:tensorflow:Running local_init_op.\n",
+            "INFO:tensorflow:Done running local_init_op.\n",
+            "[{'logits': array([-2.9911518], dtype=float32), 'logistic': array([0.04782718], dtype=float32), 'probabilities': array([0.9521728 , 0.04782721], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.4004587], dtype=float32), 'logistic': array([0.19774333], dtype=float32), 'probabilities': array([0.80225664, 0.19774333], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.22880633], dtype=float32), 'logistic': array([0.5569533], dtype=float32), 'probabilities': array([0.44304666, 0.5569533 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.16882949], dtype=float32), 'logistic': array([0.4578926], dtype=float32), 'probabilities': array([0.5421074, 0.4578926], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.4646667], dtype=float32), 'logistic': array([0.1877546], dtype=float32), 'probabilities': array([0.81224537, 0.1877546 ], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.76363224], dtype=float32), 'logistic': array([0.6821418], dtype=float32), 'probabilities': array([0.3178582, 0.6821418], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.15117581], dtype=float32), 'logistic': array([0.5377221], dtype=float32), 'probabilities': array([0.46227786, 0.5377221 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.466112], dtype=float32), 'logistic': array([0.07826826], dtype=float32), 'probabilities': array([0.92173177, 0.07826827], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.1291265], dtype=float32), 'logistic': array([0.5322368], dtype=float32), 'probabilities': array([0.46776313, 0.5322368 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.61304265], dtype=float32), 'logistic': array([0.64863455], dtype=float32), 'probabilities': array([0.35136545, 0.64863455], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.27501914], dtype=float32), 'logistic': array([0.5683247], dtype=float32), 'probabilities': array([0.43167531, 0.5683247 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.4670756], dtype=float32), 'logistic': array([0.07819873], dtype=float32), 'probabilities': array([0.92180127, 0.07819878], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.5694486], dtype=float32), 'logistic': array([0.827705], dtype=float32), 'probabilities': array([0.17229502, 0.82770497], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.9188141], dtype=float32), 'logistic': array([0.28519958], dtype=float32), 'probabilities': array([0.7148004 , 0.28519958], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.1989137], dtype=float32), 'logistic': array([0.76833147], dtype=float32), 'probabilities': array([0.23166853, 0.7683315 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.15608089], dtype=float32), 'logistic': array([0.4610588], dtype=float32), 'probabilities': array([0.5389412, 0.4610588], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.0134003], dtype=float32), 'logistic': array([0.11780313], dtype=float32), 'probabilities': array([0.88219684, 0.11780314], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.2350754], dtype=float32), 'logistic': array([0.77470565], dtype=float32), 'probabilities': array([0.22529435, 0.77470565], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.9540072], dtype=float32), 'logistic': array([0.27807963], dtype=float32), 'probabilities': array([0.7219204 , 0.27807966], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.7661345], dtype=float32), 'logistic': array([0.05918184], dtype=float32), 'probabilities': array([0.94081813, 0.05918188], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.429364], dtype=float32), 'logistic': array([0.08096078], dtype=float32), 'probabilities': array([0.91903925, 0.08096079], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.787502], dtype=float32), 'logistic': array([0.05800328], dtype=float32), 'probabilities': array([0.94199675, 0.05800329], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.3005359], dtype=float32), 'logistic': array([0.5745735], dtype=float32), 'probabilities': array([0.42542645, 0.5745735 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-3.1042542], dtype=float32), 'logistic': array([0.04293209], dtype=float32), 'probabilities': array([0.95706785, 0.04293211], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.41050717], dtype=float32), 'logistic': array([0.60120946], dtype=float32), 'probabilities': array([0.3987905 , 0.60120946], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.20139535], dtype=float32), 'logistic': array([0.55017936], dtype=float32), 'probabilities': array([0.4498207 , 0.55017936], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.7640744], dtype=float32), 'logistic': array([0.14628077], dtype=float32), 'probabilities': array([0.8537192 , 0.14628078], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.5432835], dtype=float32), 'logistic': array([0.17605844], dtype=float32), 'probabilities': array([0.8239415 , 0.17605846], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.5007448], dtype=float32), 'logistic': array([0.18231449], dtype=float32), 'probabilities': array([0.81768554, 0.18231447], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.2715969], dtype=float32), 'logistic': array([0.781016], dtype=float32), 'probabilities': array([0.21898401, 0.78101593], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.3652868], dtype=float32), 'logistic': array([0.08585832], dtype=float32), 'probabilities': array([0.91414165, 0.08585834], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.9088785], dtype=float32), 'logistic': array([0.7127706], dtype=float32), 'probabilities': array([0.2872294, 0.7127706], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.8234996], dtype=float32), 'logistic': array([0.13901451], dtype=float32), 'probabilities': array([0.8609855 , 0.13901448], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.2837226], dtype=float32), 'logistic': array([0.57045865], dtype=float32), 'probabilities': array([0.42954138, 0.57045865], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.2953714], dtype=float32), 'logistic': array([0.21494502], dtype=float32), 'probabilities': array([0.78505504, 0.21494505], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.6921089], dtype=float32), 'logistic': array([0.06344059], dtype=float32), 'probabilities': array([0.9365594, 0.0634406], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.1698916], dtype=float32), 'logistic': array([0.10248697], dtype=float32), 'probabilities': array([0.89751303, 0.10248701], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.461048], dtype=float32), 'logistic': array([0.07863438], dtype=float32), 'probabilities': array([0.92136556, 0.07863437], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.7973876], dtype=float32), 'logistic': array([0.85783064], dtype=float32), 'probabilities': array([0.14216936, 0.8578306 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.8036375], dtype=float32), 'logistic': array([0.05712795], dtype=float32), 'probabilities': array([0.94287205, 0.05712793], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.39274916], dtype=float32), 'logistic': array([0.59694433], dtype=float32), 'probabilities': array([0.40305567, 0.59694433], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.3470836], dtype=float32), 'logistic': array([0.08729783], dtype=float32), 'probabilities': array([0.91270214, 0.08729786], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.76283795], dtype=float32), 'logistic': array([0.31803045], dtype=float32), 'probabilities': array([0.6819695 , 0.31803042], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.4771906], dtype=float32), 'logistic': array([0.18585214], dtype=float32), 'probabilities': array([0.81414783, 0.18585213], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.1863325], dtype=float32), 'logistic': array([0.10098457], dtype=float32), 'probabilities': array([0.8990154 , 0.10098457], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.2755742], dtype=float32), 'logistic': array([0.7816954], dtype=float32), 'probabilities': array([0.21830453, 0.7816955 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.466594], dtype=float32), 'logistic': array([0.07823348], dtype=float32), 'probabilities': array([0.9217665, 0.0782335], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.5014478], dtype=float32), 'logistic': array([0.18220967], dtype=float32), 'probabilities': array([0.81779027, 0.18220969], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.5856758], dtype=float32), 'logistic': array([0.35762766], dtype=float32), 'probabilities': array([0.6423723 , 0.35762766], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.92840326], dtype=float32), 'logistic': array([0.28324878], dtype=float32), 'probabilities': array([0.7167512 , 0.28324878], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.7017746], dtype=float32), 'logistic': array([0.06286868], dtype=float32), 'probabilities': array([0.9371313 , 0.06286872], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.5984826], dtype=float32), 'logistic': array([0.16819379], dtype=float32), 'probabilities': array([0.8318062, 0.1681938], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-3.2376895], dtype=float32), 'logistic': array([0.03777179], dtype=float32), 'probabilities': array([0.9622283 , 0.03777178], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.8366582], dtype=float32), 'logistic': array([0.05537504], dtype=float32), 'probabilities': array([0.9446249 , 0.05537508], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.3536036], dtype=float32), 'logistic': array([0.08677974], dtype=float32), 'probabilities': array([0.9132202 , 0.08677976], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.5824754], dtype=float32), 'logistic': array([0.07027477], dtype=float32), 'probabilities': array([0.92972517, 0.07027482], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.0110137], dtype=float32), 'logistic': array([0.11805138], dtype=float32), 'probabilities': array([0.8819486 , 0.11805139], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([2.582967], dtype=float32), 'logistic': array([0.9297573], dtype=float32), 'probabilities': array([0.07024271, 0.9297573 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.8985052], dtype=float32), 'logistic': array([0.13027775], dtype=float32), 'probabilities': array([0.8697223 , 0.13027775], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.7292264], dtype=float32), 'logistic': array([0.06127065], dtype=float32), 'probabilities': array([0.9387294 , 0.06127065], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.480639], dtype=float32), 'logistic': array([0.18533093], dtype=float32), 'probabilities': array([0.814669  , 0.18533091], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.08932061], dtype=float32), 'logistic': array([0.5223153], dtype=float32), 'probabilities': array([0.4776847, 0.5223153], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.7956344], dtype=float32), 'logistic': array([0.1423833], dtype=float32), 'probabilities': array([0.8576167 , 0.14238332], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.2542205], dtype=float32), 'logistic': array([0.77802956], dtype=float32), 'probabilities': array([0.22197042, 0.7780296 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.9831486], dtype=float32), 'logistic': array([0.12098357], dtype=float32), 'probabilities': array([0.8790164, 0.1209836], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.15100642], dtype=float32), 'logistic': array([0.53768003], dtype=float32), 'probabilities': array([0.46231997, 0.53768003], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.804147], dtype=float32), 'logistic': array([0.30913913], dtype=float32), 'probabilities': array([0.69086087, 0.30913913], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.796882], dtype=float32), 'logistic': array([0.05749288], dtype=float32), 'probabilities': array([0.9425071, 0.0574929], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.6893947], dtype=float32), 'logistic': array([0.06360206], dtype=float32), 'probabilities': array([0.93639797, 0.06360206], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.20215173], dtype=float32), 'logistic': array([0.5503665], dtype=float32), 'probabilities': array([0.44963345, 0.5503665 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.9487637], dtype=float32), 'logistic': array([0.8753118], dtype=float32), 'probabilities': array([0.12468822, 0.87531173], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.006777], dtype=float32), 'logistic': array([0.2676111], dtype=float32), 'probabilities': array([0.732389 , 0.2676111], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-3.8807755], dtype=float32), 'logistic': array([0.02021769], dtype=float32), 'probabilities': array([0.9797824 , 0.02021763], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.3911064], dtype=float32), 'logistic': array([0.08385339], dtype=float32), 'probabilities': array([0.9161466 , 0.08385339], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.3623312], dtype=float32), 'logistic': array([0.08609056], dtype=float32), 'probabilities': array([0.9139094, 0.0860906], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.7980475], dtype=float32), 'logistic': array([0.05742976], dtype=float32), 'probabilities': array([0.9425702 , 0.05742977], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.5042093], dtype=float32), 'logistic': array([0.07556364], dtype=float32), 'probabilities': array([0.92443633, 0.07556362], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.461048], dtype=float32), 'logistic': array([0.07863438], dtype=float32), 'probabilities': array([0.92136556, 0.07863437], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.50003606], dtype=float32), 'logistic': array([0.6224678], dtype=float32), 'probabilities': array([0.3775322, 0.6224678], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([2.9944856], dtype=float32), 'logistic': array([0.9523244], dtype=float32), 'probabilities': array([0.04767562, 0.95232433], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.19265337], dtype=float32), 'logistic': array([0.54801494], dtype=float32), 'probabilities': array([0.4519851 , 0.54801494], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.9188141], dtype=float32), 'logistic': array([0.28519958], dtype=float32), 'probabilities': array([0.7148004 , 0.28519958], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.0115798], dtype=float32), 'logistic': array([0.11799246], dtype=float32), 'probabilities': array([0.88200754, 0.11799248], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([2.628688], dtype=float32), 'logistic': array([0.93268526], dtype=float32), 'probabilities': array([0.06731477, 0.9326852 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.757235], dtype=float32), 'logistic': array([0.0596793], dtype=float32), 'probabilities': array([0.9403207 , 0.05967934], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.09899883], dtype=float32), 'logistic': array([0.47527048], dtype=float32), 'probabilities': array([0.5247295 , 0.47527048], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.11380883], dtype=float32), 'logistic': array([0.5284215], dtype=float32), 'probabilities': array([0.47157848, 0.5284215 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.9072266], dtype=float32), 'logistic': array([0.05179751], dtype=float32), 'probabilities': array([0.9482025 , 0.05179748], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.99128777], dtype=float32), 'logistic': array([0.7293422], dtype=float32), 'probabilities': array([0.2706578, 0.7293422], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.2285175], dtype=float32), 'logistic': array([0.773559], dtype=float32), 'probabilities': array([0.226441, 0.773559], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([2.9299238], dtype=float32), 'logistic': array([0.949306], dtype=float32), 'probabilities': array([0.05069399, 0.949306  ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.063081], dtype=float32), 'logistic': array([0.11273727], dtype=float32), 'probabilities': array([0.88726276, 0.11273728], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.5640576], dtype=float32), 'logistic': array([0.07148775], dtype=float32), 'probabilities': array([0.9285123 , 0.07148775], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([2.7252948], dtype=float32), 'logistic': array([0.93850285], dtype=float32), 'probabilities': array([0.06149716, 0.93850285], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.28539297], dtype=float32), 'logistic': array([0.42913213], dtype=float32), 'probabilities': array([0.5708679, 0.4291321], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.3330688], dtype=float32), 'logistic': array([0.7913478], dtype=float32), 'probabilities': array([0.2086522, 0.7913478], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.5492454], dtype=float32), 'logistic': array([0.17519528], dtype=float32), 'probabilities': array([0.8248047 , 0.17519529], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-3.2513099], dtype=float32), 'logistic': array([0.03727987], dtype=float32), 'probabilities': array([0.96272016, 0.03727985], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.536588], dtype=float32), 'logistic': array([0.0733327], dtype=float32), 'probabilities': array([0.92666733, 0.0733327 ], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.3817232], dtype=float32), 'logistic': array([0.20073241], dtype=float32), 'probabilities': array([0.79926765, 0.20073241], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.8067214], dtype=float32), 'logistic': array([0.05696204], dtype=float32), 'probabilities': array([0.9430379 , 0.05696204], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.3164588], dtype=float32), 'logistic': array([0.578461], dtype=float32), 'probabilities': array([0.421539, 0.578461], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.277787], dtype=float32), 'logistic': array([0.43099642], dtype=float32), 'probabilities': array([0.5690036, 0.4309964], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.33869], dtype=float32), 'logistic': array([0.58387226], dtype=float32), 'probabilities': array([0.4161277, 0.5838723], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.2614909], dtype=float32), 'logistic': array([0.56500274], dtype=float32), 'probabilities': array([0.43499726, 0.5650028 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.8927202], dtype=float32), 'logistic': array([0.1309346], dtype=float32), 'probabilities': array([0.86906534, 0.13093463], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.2541428], dtype=float32), 'logistic': array([0.77801615], dtype=float32), 'probabilities': array([0.22198385, 0.7780162 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.1930841], dtype=float32), 'logistic': array([0.76729214], dtype=float32), 'probabilities': array([0.2327078, 0.7672922], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.53215903], dtype=float32), 'logistic': array([0.6299865], dtype=float32), 'probabilities': array([0.37001342, 0.6299865 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-3.0529315], dtype=float32), 'logistic': array([0.04509106], dtype=float32), 'probabilities': array([0.95490885, 0.04509108], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.8308324], dtype=float32), 'logistic': array([0.69653094], dtype=float32), 'probabilities': array([0.3034691, 0.6965309], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.3730043], dtype=float32), 'logistic': array([0.5921847], dtype=float32), 'probabilities': array([0.40781528, 0.5921847 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.34194192], dtype=float32), 'logistic': array([0.58466214], dtype=float32), 'probabilities': array([0.41533786, 0.5846622 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-3.5923533], dtype=float32), 'logistic': array([0.02679566], dtype=float32), 'probabilities': array([0.9732044 , 0.02679568], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.7116824], dtype=float32), 'logistic': array([0.84705436], dtype=float32), 'probabilities': array([0.15294562, 0.84705436], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.3975781], dtype=float32), 'logistic': array([0.5981056], dtype=float32), 'probabilities': array([0.40189433, 0.5981056 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.7668092], dtype=float32), 'logistic': array([0.05914432], dtype=float32), 'probabilities': array([0.9408557 , 0.05914432], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.2755911], dtype=float32), 'logistic': array([0.568465], dtype=float32), 'probabilities': array([0.431535, 0.568465], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.731716], dtype=float32), 'logistic': array([0.06112763], dtype=float32), 'probabilities': array([0.9388724 , 0.06112761], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.9463813], dtype=float32), 'logistic': array([0.72038686], dtype=float32), 'probabilities': array([0.27961317, 0.72038686], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.16649966], dtype=float32), 'logistic': array([0.458471], dtype=float32), 'probabilities': array([0.54152906, 0.458471  ], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.5530996], dtype=float32), 'logistic': array([0.07221851], dtype=float32), 'probabilities': array([0.9277815 , 0.07221853], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.28461674], dtype=float32), 'logistic': array([0.4293223], dtype=float32), 'probabilities': array([0.5706777 , 0.42932227], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.4343987], dtype=float32), 'logistic': array([0.8075857], dtype=float32), 'probabilities': array([0.19241425, 0.8075858 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.6186082], dtype=float32), 'logistic': array([0.06795037], dtype=float32), 'probabilities': array([0.93204963, 0.06795039], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.7286317], dtype=float32), 'logistic': array([0.06130484], dtype=float32), 'probabilities': array([0.93869513, 0.06130485], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.00251822], dtype=float32), 'logistic': array([0.49937046], dtype=float32), 'probabilities': array([0.50062954, 0.49937043], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.4931707], dtype=float32), 'logistic': array([0.07633832], dtype=float32), 'probabilities': array([0.9236617 , 0.07633833], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.686065], dtype=float32), 'logistic': array([0.06380066], dtype=float32), 'probabilities': array([0.9361993 , 0.06380066], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.986124], dtype=float32), 'logistic': array([0.12066752], dtype=float32), 'probabilities': array([0.8793324 , 0.12066752], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-3.1012986], dtype=float32), 'logistic': array([0.04305372], dtype=float32), 'probabilities': array([0.95694625, 0.04305372], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.271466], dtype=float32), 'logistic': array([0.5674527], dtype=float32), 'probabilities': array([0.4325472, 0.5674528], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.505655], dtype=float32), 'logistic': array([0.07546267], dtype=float32), 'probabilities': array([0.9245373 , 0.07546269], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-3.5536938], dtype=float32), 'logistic': array([0.02782249], dtype=float32), 'probabilities': array([0.97217757, 0.02782249], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.8036375], dtype=float32), 'logistic': array([0.05712795], dtype=float32), 'probabilities': array([0.94287205, 0.05712793], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.469196], dtype=float32), 'logistic': array([0.07804602], dtype=float32), 'probabilities': array([0.9219539 , 0.07804606], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.4116476], dtype=float32), 'logistic': array([0.0822888], dtype=float32), 'probabilities': array([0.9177112 , 0.08228882], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.1524737], dtype=float32), 'logistic': array([0.10410026], dtype=float32), 'probabilities': array([0.8958997 , 0.10410029], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.8296025], dtype=float32), 'logistic': array([0.86171436], dtype=float32), 'probabilities': array([0.13828564, 0.8617143 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.7014534], dtype=float32), 'logistic': array([0.06288761], dtype=float32), 'probabilities': array([0.93711233, 0.06288764], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.5796006], dtype=float32), 'logistic': array([0.07046285], dtype=float32), 'probabilities': array([0.9295372, 0.0704629], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.2745534], dtype=float32), 'logistic': array([0.5682104], dtype=float32), 'probabilities': array([0.43178958, 0.5682104 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([2.4738035], dtype=float32), 'logistic': array([0.92228484], dtype=float32), 'probabilities': array([0.07771517, 0.9222848 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.6728299], dtype=float32), 'logistic': array([0.06459573], dtype=float32), 'probabilities': array([0.93540424, 0.06459577], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.5306735], dtype=float32), 'logistic': array([0.07373562], dtype=float32), 'probabilities': array([0.9262644 , 0.07373563], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.7286317], dtype=float32), 'logistic': array([0.06130484], dtype=float32), 'probabilities': array([0.93869513, 0.06130485], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.82400125], dtype=float32), 'logistic': array([0.30491498], dtype=float32), 'probabilities': array([0.69508505, 0.30491498], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.4299476], dtype=float32), 'logistic': array([0.08091736], dtype=float32), 'probabilities': array([0.91908264, 0.08091737], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.1803586], dtype=float32), 'logistic': array([0.1015282], dtype=float32), 'probabilities': array([0.8984718, 0.1015282], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-3.1416447], dtype=float32), 'logistic': array([0.04142171], dtype=float32), 'probabilities': array([0.9585782 , 0.04142176], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.1803424], dtype=float32), 'logistic': array([0.10152969], dtype=float32), 'probabilities': array([0.89847034, 0.10152969], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.7037666], dtype=float32), 'logistic': array([0.06275144], dtype=float32), 'probabilities': array([0.9372486 , 0.06275146], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.9718199], dtype=float32), 'logistic': array([0.12219352], dtype=float32), 'probabilities': array([0.8778064 , 0.12219355], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.8270032], dtype=float32), 'logistic': array([0.0558823], dtype=float32), 'probabilities': array([0.9441177, 0.0558823], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.88284034], dtype=float32), 'logistic': array([0.29258955], dtype=float32), 'probabilities': array([0.7074105 , 0.29258958], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.9553416], dtype=float32), 'logistic': array([0.12397206], dtype=float32), 'probabilities': array([0.87602794, 0.12397209], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.7498772], dtype=float32), 'logistic': array([0.06009358], dtype=float32), 'probabilities': array([0.93990636, 0.06009358], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.9340806], dtype=float32), 'logistic': array([0.12629959], dtype=float32), 'probabilities': array([0.8737004, 0.1262996], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.03955801], dtype=float32), 'logistic': array([0.50988823], dtype=float32), 'probabilities': array([0.4901118 , 0.50988823], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.1803424], dtype=float32), 'logistic': array([0.10152969], dtype=float32), 'probabilities': array([0.89847034, 0.10152969], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.27501914], dtype=float32), 'logistic': array([0.5683247], dtype=float32), 'probabilities': array([0.43167531, 0.5683247 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.3662412], dtype=float32), 'logistic': array([0.08578348], dtype=float32), 'probabilities': array([0.9142166 , 0.08578347], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([2.0099223], dtype=float32), 'logistic': array([0.8818349], dtype=float32), 'probabilities': array([0.11816508, 0.8818349 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.67979985], dtype=float32), 'logistic': array([0.663694], dtype=float32), 'probabilities': array([0.33630598, 0.663694  ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.879125], dtype=float32), 'logistic': array([0.05319515], dtype=float32), 'probabilities': array([0.94680476, 0.05319518], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([2.0294778], dtype=float32), 'logistic': array([0.8838575], dtype=float32), 'probabilities': array([0.1161425, 0.8838574], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.8609657], dtype=float32), 'logistic': array([0.0541172], dtype=float32), 'probabilities': array([0.9458828 , 0.05411725], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.1746242], dtype=float32), 'logistic': array([0.10205248], dtype=float32), 'probabilities': array([0.89794755, 0.10205251], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([2.4458582], dtype=float32), 'logistic': array([0.92025805], dtype=float32), 'probabilities': array([0.07974196, 0.9202581 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.503615], dtype=float32), 'logistic': array([0.07560512], dtype=float32), 'probabilities': array([0.92439485, 0.07560515], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.8598158], dtype=float32), 'logistic': array([0.7026222], dtype=float32), 'probabilities': array([0.29737782, 0.7026222 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.7292264], dtype=float32), 'logistic': array([0.06127065], dtype=float32), 'probabilities': array([0.9387294 , 0.06127065], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.4136783], dtype=float32), 'logistic': array([0.19565457], dtype=float32), 'probabilities': array([0.8043454 , 0.19565453], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-3.328677], dtype=float32), 'logistic': array([0.03460044], dtype=float32), 'probabilities': array([0.96539956, 0.0346004 ], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.4931707], dtype=float32), 'logistic': array([0.07633832], dtype=float32), 'probabilities': array([0.9236617 , 0.07633833], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.20968063], dtype=float32), 'logistic': array([0.5522289], dtype=float32), 'probabilities': array([0.44777104, 0.5522289 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([2.0700057], dtype=float32), 'logistic': array([0.8879535], dtype=float32), 'probabilities': array([0.11204648, 0.8879535 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.050903], dtype=float32), 'logistic': array([0.11396119], dtype=float32), 'probabilities': array([0.88603884, 0.11396117], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.1391307], dtype=float32), 'logistic': array([0.24248001], dtype=float32), 'probabilities': array([0.75751996, 0.24247998], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.4668667], dtype=float32), 'logistic': array([0.07821384], dtype=float32), 'probabilities': array([0.9217861 , 0.07821383], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.4350789], dtype=float32), 'logistic': array([0.08053654], dtype=float32), 'probabilities': array([0.91946346, 0.08053657], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.5771333], dtype=float32), 'logistic': array([0.17120185], dtype=float32), 'probabilities': array([0.8287981 , 0.17120185], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.7858835], dtype=float32), 'logistic': array([0.14357814], dtype=float32), 'probabilities': array([0.8564218 , 0.14357814], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([2.6589274], dtype=float32), 'logistic': array([0.9345591], dtype=float32), 'probabilities': array([0.0654409, 0.9345591], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.00878974], dtype=float32), 'logistic': array([0.50219744], dtype=float32), 'probabilities': array([0.49780256, 0.5021974 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.3917007], dtype=float32), 'logistic': array([0.08380774], dtype=float32), 'probabilities': array([0.9161923 , 0.08380776], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.4829273], dtype=float32), 'logistic': array([0.18498567], dtype=float32), 'probabilities': array([0.8150143 , 0.18498567], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.27532443], dtype=float32), 'logistic': array([0.56839955], dtype=float32), 'probabilities': array([0.43160036, 0.56839955], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.6461924], dtype=float32), 'logistic': array([0.6561519], dtype=float32), 'probabilities': array([0.34384808, 0.6561519 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.748494], dtype=float32), 'logistic': array([0.14823723], dtype=float32), 'probabilities': array([0.8517628 , 0.14823724], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.3968205], dtype=float32), 'logistic': array([0.1983211], dtype=float32), 'probabilities': array([0.80167884, 0.19832112], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.6303928], dtype=float32), 'logistic': array([0.06720778], dtype=float32), 'probabilities': array([0.93279225, 0.06720783], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.1766055], dtype=float32), 'logistic': array([0.10187107], dtype=float32), 'probabilities': array([0.89812887, 0.10187109], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.5160866], dtype=float32), 'logistic': array([0.8199615], dtype=float32), 'probabilities': array([0.18003851, 0.8199615 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-3.5207646], dtype=float32), 'logistic': array([0.02872711], dtype=float32), 'probabilities': array([0.9712729 , 0.02872716], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.5973718], dtype=float32), 'logistic': array([0.06930774], dtype=float32), 'probabilities': array([0.9306922 , 0.06930775], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.37716725], dtype=float32), 'logistic': array([0.4068103], dtype=float32), 'probabilities': array([0.5931897 , 0.40681034], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.27651295], dtype=float32), 'logistic': array([0.56869113], dtype=float32), 'probabilities': array([0.43130887, 0.56869113], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.3440317], dtype=float32), 'logistic': array([0.20684785], dtype=float32), 'probabilities': array([0.79315215, 0.20684782], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.5906837], dtype=float32), 'logistic': array([0.06974036], dtype=float32), 'probabilities': array([0.9302595 , 0.06974041], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.0678499], dtype=float32), 'logistic': array([0.11226112], dtype=float32), 'probabilities': array([0.8877388 , 0.11226114], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.8341486], dtype=float32), 'logistic': array([0.05550647], dtype=float32), 'probabilities': array([0.94449353, 0.0555065 ], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-3.328677], dtype=float32), 'logistic': array([0.03460044], dtype=float32), 'probabilities': array([0.96539956, 0.0346004 ], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.8413413], dtype=float32), 'logistic': array([0.0551306], dtype=float32), 'probabilities': array([0.9448694 , 0.05513063], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([3.1192296], dtype=float32), 'logistic': array([0.95767903], dtype=float32), 'probabilities': array([0.04232099, 0.957679  ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.0053451], dtype=float32), 'logistic': array([0.7321082], dtype=float32), 'probabilities': array([0.2678918, 0.7321082], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.5902975], dtype=float32), 'logistic': array([0.06976548], dtype=float32), 'probabilities': array([0.9302345 , 0.06976548], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.19656105], dtype=float32), 'logistic': array([0.5489826], dtype=float32), 'probabilities': array([0.45101732, 0.5489826 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.0490183], dtype=float32), 'logistic': array([0.2594137], dtype=float32), 'probabilities': array([0.74058634, 0.2594137 ], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.8360763], dtype=float32), 'logistic': array([0.05540553], dtype=float32), 'probabilities': array([0.94459444, 0.05540553], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.2558558], dtype=float32), 'logistic': array([0.0948455], dtype=float32), 'probabilities': array([0.90515447, 0.09484556], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.1610253], dtype=float32), 'logistic': array([0.1033054], dtype=float32), 'probabilities': array([0.89669454, 0.10330544], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.4262478], dtype=float32), 'logistic': array([0.08119294], dtype=float32), 'probabilities': array([0.918807  , 0.08119294], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.27497086], dtype=float32), 'logistic': array([0.5683128], dtype=float32), 'probabilities': array([0.43168712, 0.5683128 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.7163498], dtype=float32), 'logistic': array([0.06201544], dtype=float32), 'probabilities': array([0.9379846 , 0.06201546], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.5277644], dtype=float32), 'logistic': array([0.3710385], dtype=float32), 'probabilities': array([0.6289615 , 0.37103847], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.76512283], dtype=float32), 'logistic': array([0.3175351], dtype=float32), 'probabilities': array([0.68246496, 0.3175351 ], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.841622], dtype=float32), 'logistic': array([0.055116], dtype=float32), 'probabilities': array([0.94488394, 0.055116  ], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.0200126], dtype=float32), 'logistic': array([0.11711767], dtype=float32), 'probabilities': array([0.8828823 , 0.11711768], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.757176], dtype=float32), 'logistic': array([0.6807403], dtype=float32), 'probabilities': array([0.3192597, 0.6807403], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.27446154], dtype=float32), 'logistic': array([0.43181214], dtype=float32), 'probabilities': array([0.5681879 , 0.43181217], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.6056793], dtype=float32), 'logistic': array([0.06877378], dtype=float32), 'probabilities': array([0.93122613, 0.06877381], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.69371986], dtype=float32), 'logistic': array([0.3332061], dtype=float32), 'probabilities': array([0.6667939 , 0.33320606], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.5667623], dtype=float32), 'logistic': array([0.17267841], dtype=float32), 'probabilities': array([0.8273216 , 0.17267844], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.8362553], dtype=float32), 'logistic': array([0.8625052], dtype=float32), 'probabilities': array([0.13749477, 0.86250526], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.6707311], dtype=float32), 'logistic': array([0.84167325], dtype=float32), 'probabilities': array([0.15832673, 0.84167325], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.279658], dtype=float32), 'logistic': array([0.09282175], dtype=float32), 'probabilities': array([0.9071782 , 0.09282174], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.18126197], dtype=float32), 'logistic': array([0.5451918], dtype=float32), 'probabilities': array([0.4548082, 0.5451918], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.5730307], dtype=float32), 'logistic': array([0.07089439], dtype=float32), 'probabilities': array([0.9291056 , 0.07089441], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.1803586], dtype=float32), 'logistic': array([0.1015282], dtype=float32), 'probabilities': array([0.8984718, 0.1015282], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.02309195], dtype=float32), 'logistic': array([0.49422726], dtype=float32), 'probabilities': array([0.5057727 , 0.49422723], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.4932191], dtype=float32), 'logistic': array([0.07633492], dtype=float32), 'probabilities': array([0.9236651 , 0.07633492], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.9571006], dtype=float32), 'logistic': array([0.87621886], dtype=float32), 'probabilities': array([0.12378117, 0.87621886], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.15039], dtype=float32), 'logistic': array([0.75958216], dtype=float32), 'probabilities': array([0.24041785, 0.75958216], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.6192074], dtype=float32), 'logistic': array([0.0679124], dtype=float32), 'probabilities': array([0.93208754, 0.06791245], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.41244993], dtype=float32), 'logistic': array([0.60167515], dtype=float32), 'probabilities': array([0.39832482, 0.60167515], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.1697683], dtype=float32), 'logistic': array([0.10249829], dtype=float32), 'probabilities': array([0.89750165, 0.10249835], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.1264344], dtype=float32), 'logistic': array([0.24481973], dtype=float32), 'probabilities': array([0.7551803 , 0.24481972], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.6952732], dtype=float32), 'logistic': array([0.06325284], dtype=float32), 'probabilities': array([0.93674713, 0.06325285], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.41352627], dtype=float32), 'logistic': array([0.6019331], dtype=float32), 'probabilities': array([0.39806688, 0.6019331 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.05138405], dtype=float32), 'logistic': array([0.5128432], dtype=float32), 'probabilities': array([0.48715684, 0.5128432 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-3.297342], dtype=float32), 'logistic': array([0.03566247], dtype=float32), 'probabilities': array([0.9643375 , 0.03566249], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.9521616], dtype=float32), 'logistic': array([0.12431782], dtype=float32), 'probabilities': array([0.8756822 , 0.12431786], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.0605507], dtype=float32), 'logistic': array([0.74279577], dtype=float32), 'probabilities': array([0.25720423, 0.74279577], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.6585377], dtype=float32), 'logistic': array([0.3410682], dtype=float32), 'probabilities': array([0.65893185, 0.34106815], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.9322713], dtype=float32), 'logistic': array([0.71753585], dtype=float32), 'probabilities': array([0.28246415, 0.71753585], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.68333626], dtype=float32), 'logistic': array([0.3355171], dtype=float32), 'probabilities': array([0.66448295, 0.3355171 ], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.6918814], dtype=float32), 'logistic': array([0.06345406], dtype=float32), 'probabilities': array([0.9365459 , 0.06345412], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.4290912], dtype=float32), 'logistic': array([0.08098108], dtype=float32), 'probabilities': array([0.9190189 , 0.08098108], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.3137395], dtype=float32), 'logistic': array([0.08999142], dtype=float32), 'probabilities': array([0.91000855, 0.08999143], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-4.454822], dtype=float32), 'logistic': array([0.01148883], dtype=float32), 'probabilities': array([0.9885111 , 0.01148886], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.5428593], dtype=float32), 'logistic': array([0.82388], dtype=float32), 'probabilities': array([0.17612, 0.82388], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([0.34633598], dtype=float32), 'logistic': array([0.58572876], dtype=float32), 'probabilities': array([0.4142712 , 0.58572876], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.1803424], dtype=float32), 'logistic': array([0.10152969], dtype=float32), 'probabilities': array([0.89847034, 0.10152969], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.6151872], dtype=float32), 'logistic': array([0.16586965], dtype=float32), 'probabilities': array([0.8341303 , 0.16586968], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.2373172], dtype=float32), 'logistic': array([0.77509665], dtype=float32), 'probabilities': array([0.22490332, 0.7750967 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.6785787], dtype=float32), 'logistic': array([0.3365786], dtype=float32), 'probabilities': array([0.6634214, 0.3365786], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.723042], dtype=float32), 'logistic': array([0.0616273], dtype=float32), 'probabilities': array([0.9383727 , 0.06162732], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.0881109], dtype=float32), 'logistic': array([0.7480258], dtype=float32), 'probabilities': array([0.25197417, 0.74802583], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([1.0094225], dtype=float32), 'logistic': array([0.73290706], dtype=float32), 'probabilities': array([0.26709285, 0.7329071 ], dtype=float32), 'class_ids': array([1]), 'classes': array([b'1'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-2.9167404], dtype=float32), 'logistic': array([0.05133221], dtype=float32), 'probabilities': array([0.94866776, 0.0513322 ], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.38148502], dtype=float32), 'logistic': array([0.4057688], dtype=float32), 'probabilities': array([0.59423125, 0.40576878], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-1.8985052], dtype=float32), 'logistic': array([0.13027775], dtype=float32), 'probabilities': array([0.8697223 , 0.13027775], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}, {'logits': array([-0.77453923], dtype=float32), 'logistic': array([0.315498], dtype=float32), 'probabilities': array([0.684502, 0.315498], dtype=float32), 'class_ids': array([0]), 'classes': array([b'0'], dtype=object), 'all_class_ids': array([0, 1], dtype=int32), 'all_classes': array([b'0', b'1'], dtype=object)}]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "8vMwGjEvszKO",
+        "outputId": "6eef6c87-e042-4491-f5fc-3ef9c31f29d2"
+      },
+      "source": [
+        "print(dfeval.loc[3])\n",
+        "print(y_eval.loc[3])\n",
+        "print(result[3]['probabilities'][1])"
+      ],
+      "execution_count": 28,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "sex                        female\n",
+            "age                            55\n",
+            "n_siblings_spouses              0\n",
+            "parch                           0\n",
+            "fare                           16\n",
+            "class                      Second\n",
+            "deck                      unknown\n",
+            "embark_town           Southampton\n",
+            "alone                           y\n",
+            "Name: 3, dtype: object\n",
+            "1\n",
+            "0.4578926\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 434
+        },
+        "id": "z6HEE1Sb72Ll",
+        "outputId": "f898634c-3165-48df-d168-0a63a525ddc4"
+      },
+      "source": [
+        "pred_dicts = list(linear_est.predict(eval_input_fn))\n",
+        "probs = pd.Series([pred['probabilities'][1] for pred in pred_dicts])\n",
+        "\n",
+        "probs.plot(kind = 'hist', bins = 20, title = 'predicted probabilities')"
+      ],
+      "execution_count": 23,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "INFO:tensorflow:Calling model_fn.\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/usr/local/lib/python3.7/dist-packages/keras/engine/base_layer_v1.py:1684: UserWarning: `layer.add_variable` is deprecated and will be removed in a future version. Please use `layer.add_weight` method instead.\n",
+            "  warnings.warn('`layer.add_variable` is deprecated and '\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "INFO:tensorflow:Done calling model_fn.\n",
+            "INFO:tensorflow:Graph was finalized.\n",
+            "INFO:tensorflow:Restoring parameters from /tmp/tmp751xjlyc/model.ckpt-200\n",
+            "INFO:tensorflow:Running local_init_op.\n",
+            "INFO:tensorflow:Done running local_init_op.\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<matplotlib.axes._subplots.AxesSubplot at 0x7fe6144ac6d0>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 23
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "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\n",
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ]
+    }
+  ]
+}
